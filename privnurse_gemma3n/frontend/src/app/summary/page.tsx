@@ -151,7 +151,7 @@ function SummaryPageContent() {
   const [activeTab, setActiveTab] = useState(0); // Default to Discharge Note tab (index 0)
   const [originalContent, setOriginalContent] = useState("" as string);
   const [llamaResult, setLLamaResult] = useState("" as string);
-  const aiSummaryBoxRef = useRef<HTMLDivElement>(null);
+  // const aiSummaryBoxRef = useRef<HTMLDivElement>(null);
   const [nurseConfirmation, setNurseConfirmation] = useState("" as string);
   const [isLoading, setIsLoading] = useState(false as boolean);
   const [relevantText, setRelevantText] = useState<string[]>([]);
@@ -161,8 +161,8 @@ function SummaryPageContent() {
   const toast = useToast();
   const router = useRouter();
   const [activeModels, setActiveModels] = useState({
-    consultationSummaryModel: '',
-    consultationValidationModel: '',
+    // consultationSummaryModel: '',
+    // consultationValidationModel: '',
     dischargeNoteSummaryModel: '',
     dischargeNoteValidationModel: '',
     audioModel: ''
@@ -1018,6 +1018,7 @@ function SummaryPageContent() {
   }, []);
 
   // Auto-scroll AI Summary box when content updates
+  /*
   useEffect(() => {
     if (!aiSummaryBoxRef.current) return;
     
@@ -1045,6 +1046,7 @@ function SummaryPageContent() {
       observer.disconnect();
     };
   }, [llamaResult]);
+  */
 
   // Fetch nursing notes and lab reports when component mounts or patient changes
   useEffect(() => {
@@ -1466,7 +1468,7 @@ function SummaryPageContent() {
     <HStack spacing={4} align="stretch" height="100vh">
       {/* Column 1: Consultation Records */}
       <Box
-        width="25%"
+        width="40%"
         borderWidth={1}
         borderRadius="md"
         p={3}
@@ -1595,7 +1597,7 @@ function SummaryPageContent() {
 
       {/* Column 2: Original Content and Nurse Confirmation Content */}
       <Box
-        width="40%"
+        width="60%"
         borderWidth={1}
         borderRadius="md"
         p={3}
@@ -1686,7 +1688,7 @@ function SummaryPageContent() {
       </Box>
 
       {/* Column 3: AI Summary Result */}
-      <Box
+      {/* <Box
         width="35%"
         borderWidth={1}
         borderRadius="md"
@@ -1730,10 +1732,10 @@ function SummaryPageContent() {
               AI summary will appear here after processing original content...
             </Text>
           )}
-        </Box>
+        </Box> */}
 
         {/* Model Information */}
-        <Box mt={3} p={2} backgroundColor="blue.50" borderRadius="md" flexShrink={0} overflow="hidden">
+        {/* <Box mt={3} p={2} backgroundColor="blue.50" borderRadius="md" flexShrink={0} overflow="hidden">
           <Text fontSize="xs" fontWeight="medium" mb={1}>Current AI Models:</Text>
           <Text fontSize="xs" color="gray.600" noOfLines={1} wordBreak="break-word">
             Summary: {activeModels.consultationSummaryModel || 'Not configured'}
@@ -1742,7 +1744,7 @@ function SummaryPageContent() {
             Validation: {activeModels.consultationValidationModel || 'Not configured'}
           </Text>
         </Box>
-      </Box>
+      </Box> */}
     </HStack>
   );
 

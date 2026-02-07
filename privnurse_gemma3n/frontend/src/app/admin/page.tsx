@@ -18,14 +18,14 @@ function AdminPageContent() {
   const [selectedDischargeNoteSummaryModel, setSelectedDischargeNoteSummaryModel] = useState('');
   const [selectedDischargeNoteValidationModel, setSelectedDischargeNoteValidationModel] = useState('');
   const [selectedAudioTranscriptionModel, setSelectedAudioTranscriptionModel] = useState('google/gemma-3n-E4B-it');
-  const [selectedConsultationSummaryModel, setSelectedConsultationSummaryModel] = useState('');
-  const [selectedConsultationValidationModel, setSelectedConsultationValidationModel] = useState('');
+  // const [selectedConsultationSummaryModel, setSelectedConsultationSummaryModel] = useState('');
+  // const [selectedConsultationValidationModel, setSelectedConsultationValidationModel] = useState('');
   
   const [dischargeNoteSummaryModels, setDischargeNoteSummaryModels] = useState<string[]>([]);
   const [dischargeNoteValidationModels, setDischargeNoteValidationModels] = useState<string[]>([]);
   const [audioTranscriptionModels, setAudioTranscriptionModels] = useState<string[]>([]);
-  const [consultationSummaryModels, setConsultationSummaryModels] = useState<string[]>([]);
-  const [consultationValidationModels, setConsultationValidationModels] = useState<string[]>([]);
+  // const [consultationSummaryModels, setConsultationSummaryModels] = useState<string[]>([]);
+  // const [consultationValidationModels, setConsultationValidationModels] = useState<string[]>([]);
   
   const toast = useToast();
 
@@ -48,12 +48,12 @@ function AdminPageContent() {
         setAudioTranscriptionModels(allModels.filter((model: string) => 
           model.toLowerCase().includes('audio')
         ));
-        setConsultationSummaryModels(allModels.filter((model: string) => 
-          model.toLowerCase().includes('consult') && model.toLowerCase().includes('summary')
-        ));
-        setConsultationValidationModels(allModels.filter((model: string) => 
-          model.toLowerCase().includes('consult') && model.toLowerCase().includes('validation')
-        ));
+        // setConsultationSummaryModels(allModels.filter((model: string) => 
+        //   model.toLowerCase().includes('consult') && model.toLowerCase().includes('summary')
+        // ));
+        // setConsultationValidationModels(allModels.filter((model: string) => 
+        //   model.toLowerCase().includes('consult') && model.toLowerCase().includes('validation')
+        // ));
       } catch (error) {
         console.error('Error fetching models:', error);
         toast({
@@ -80,8 +80,8 @@ function AdminPageContent() {
         const data = await response.json();
         
         // Map the new API response to model selections
-        setSelectedConsultationSummaryModel(data.consultationSummaryModel || '');
-        setSelectedConsultationValidationModel(data.consultationValidationModel || '');
+        // setSelectedConsultationSummaryModel(data.consultationSummaryModel || '');
+        // setSelectedConsultationValidationModel(data.consultationValidationModel || '');
         setSelectedDischargeNoteSummaryModel(data.dischargeNoteSummaryModel || '');
         setSelectedDischargeNoteValidationModel(data.dischargeNoteValidationModel || '');
         // Audio model is fixed, don't update it from the API
@@ -110,8 +110,8 @@ function AdminPageContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          consultation_summary_model: selectedConsultationSummaryModel,
-          consultation_validation_model: selectedConsultationValidationModel,
+          // consultation_summary_model: selectedConsultationSummaryModel,
+          // consultation_validation_model: selectedConsultationValidationModel,
           discharge_note_summary_model: selectedDischargeNoteSummaryModel,
           discharge_note_validation_model: selectedDischargeNoteValidationModel,
           audio_model: 'google/gemma-3n-E4B-it' // Always use the fixed model
@@ -238,7 +238,7 @@ function AdminPageContent() {
           </Box>
 
           {/* Consultation Models - Green */}
-          <Box 
+          {/* <Box 
             borderLeft="4px solid" 
             borderLeftColor="green.500" 
             bg="green.50" 
@@ -288,7 +288,7 @@ function AdminPageContent() {
                 )}
               </Box>
             </VStack>
-          </Box>
+          </Box> */}
 
           {/* Submit Button */}
           <Button 
@@ -315,14 +315,14 @@ function AdminPageContent() {
                 {selectedAudioTranscriptionModel ? '✅' : '❌'} 
                 {' '}Audio Transcription: {selectedAudioTranscriptionModel || 'Not configured'}
               </Text>
-              <Text fontSize="sm">
+              {/* <Text fontSize="sm">
                 {selectedConsultationSummaryModel ? '✅' : '❌'} 
                 {' '}Consultation Summary: {selectedConsultationSummaryModel || 'Not configured'}
               </Text>
               <Text fontSize="sm">
                 {selectedConsultationValidationModel ? '✅' : '❌'} 
                 {' '}Consultation Validation: {selectedConsultationValidationModel || 'Not configured'}
-              </Text>
+              </Text> */}
             </VStack>
           </Box>
         </VStack>
