@@ -17,7 +17,6 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / "privnurse_gemma3n" / "backend"))
 from models import Patient, DischargeNote, ConsultationRecord, LabReport, NursingNote  # noqa: E402
 
 # ========= 設定 =========
@@ -36,11 +35,8 @@ PART_RANGE = range(1, 5)  # part1~part4
 
 IMPORT_USER_ID = int(os.getenv("IMPORT_USER_ID", "1"))
 
-# 你目前 docker compose ports: 3306:3306，所以本機連 127.0.0.1
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "mysql+pymysql://nurse:password@127.0.0.1:3306/inference_db?charset=utf8mb4",
-)
+# 如果 docker compose ports: 3306:3306，直接本機連 127.0.0.1:3306
+DATABASE_URL = "mysql+pymysql://nurse:password@nurse-mysql:3306/inference_db?charset=utf8mb4"
 
 # 批次 commit（越大越快，但失敗回滾成本越高）
 COMMIT_BATCH = int(os.getenv("COMMIT_BATCH", "2000"))
@@ -480,7 +476,6 @@ def main() -> None:
     finally:
         db.close()
         logger.info("DB session closed.")
-        logger.info(f"Log saved to: {LOG_PATH}")
 
 
 if __name__ == "__main__":

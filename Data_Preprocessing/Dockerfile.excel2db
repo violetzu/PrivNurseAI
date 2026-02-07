@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir \
 
 COPY . /app
 
-CMD ["python", "import_excels_to_db.py"]
+CMD ["python", "excel2db.py"]
