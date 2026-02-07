@@ -1,4 +1,4 @@
-FROM ./gemma-3-tcvgh-emergency-summary-v1.3.gguf
+FROM ./gemma-3-12b-tcvgh-emergency-summary-v1.3.gguf
 
 TEMPLATE """{{- range $i, $_ := .Messages }}
 {{- $last := eq (len (slice $.Messages $i)) 1 }}
