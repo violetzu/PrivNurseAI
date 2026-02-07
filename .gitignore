@@ -5,5 +5,9 @@
 *.csv
 *.log
 */logs/
+
 data/mysql/*
 data/ollama/*
+
+!data/mysql/.gitkeep
+!data/ollama/.gitkeep
