@@ -2,8 +2,6 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: ollama
-    ports:
-      - "11434:11434"
     volumes:
       - ollama:/root/.ollama
       - ./models:/models
@@ -36,8 +34,6 @@ services:
     image: mysql:8.0
     container_name: nurse-mysql
     restart: unless-stopped
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: inference_db
@@ -89,10 +85,21 @@ services:
     volumes:
       - ./privnurse_gemma3n/frontend:/frontend
       - frontend-node-modules:/frontend/node_modules
+      - frontend-build:/frontend/.next
+    # command: npm run dev
     depends_on:
       - backend
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cftunnel
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
 
 volumes:
   ollama:
   mysql-data:
   frontend-node-modules:
+  frontend-build:

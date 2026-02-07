@@ -1,1 +1,7 @@
 .env
+**/__pycache__/
+*.gguf
+*.xlsx
+*.csv
+*.log
+*/logs/
