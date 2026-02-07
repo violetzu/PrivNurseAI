@@ -154,9 +154,9 @@ class LabReport(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     patient_id = Column(Integer, ForeignKey('patients.id', ondelete='CASCADE'), nullable=False, index=True)
-    test_name = Column(String(100), nullable=False)
+    test_name = Column(Text, nullable=False) # 原本 Column(String(100), nullable=False)
     test_date = Column(Date, nullable=False, index=True)
-    result_value = Column(String(50), nullable=False)
+    result_value = Column(Text, nullable=False)  # 原本 Column(String(50), nullable=False)
     result_unit = Column(String(20))
     normal_range = Column(String(50))
     flag = Column(Enum('HIGH', 'LOW', 'CRITICAL', 'NORMAL', name='result_flag'), default='NORMAL', index=True)
