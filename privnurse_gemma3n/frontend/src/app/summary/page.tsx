@@ -1614,8 +1614,7 @@ function SummaryPageContent() {
                   borderWidth={1}
                   borderRadius="md"
                   p={3}
-                  minHeight="250px"
-                  maxHeight="300px"
+                  minHeight="85%"
                   overflowY="auto"
                   backgroundColor="gray.50"
                   fontSize="sm"
@@ -1636,12 +1635,12 @@ function SummaryPageContent() {
                 <Textarea
                   value={originalContent}
                   onChange={handleOriginalContentChange}
-                  minHeight="250px"
+                  minHeight="90%"
                   backgroundColor="white"
                   fontSize="sm"
                   placeholder="Enter original consultation content here..."
                 />
-                <Box display="flex" alignItems="center" gap={2}>
+                {/* <Box display="flex" alignItems="center" gap={2}>
                   <Button
                     mt={2}
                     size="sm"
@@ -1657,7 +1656,7 @@ function SummaryPageContent() {
                       Model settings not configured
                     </Text>
                   )}
-                </Box>
+                </Box> */}
               </>
             )}
           </Box>
@@ -1670,7 +1669,7 @@ function SummaryPageContent() {
             <Textarea
               value={nurseConfirmation}
               onChange={handleNurseConfirmationChange}
-              minHeight="200px"
+              minHeight="80%"
               backgroundColor="white"
               fontSize="sm"
               placeholder="Review and edit the AI-generated summary here..."
