@@ -1,38 +1,32 @@
 services:
   ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
+    image: ollama/ollama:0.15.5
     volumes:
-      - ollama:/root/.ollama
+      - ./data/ollama:/root/.ollama
       - ./models:/models
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    gpus: all
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 5s
       timeout: 3s
       retries: 20
+
   ollama-init:
-    image: ollama/ollama:latest
-    container_name: ollama-init
+    image: ollama/ollama:0.15.5
     depends_on:
       ollama:
         condition: service_healthy
     environment:
-      - OLLAMA_HOST=http://ollama:11434
+      OLLAMA_HOST: http://ollama:11434
     volumes:
-      - ollama:/root/.ollama
+      - ./data/ollama:/root/.ollama
       - ./models:/models:ro
-    entrypoint: ["/bin/sh", "-lc", "sh /models/create_model.sh"]
+    entrypoint: ["/bin/sh", "-lc"]
+    command: ["sh /models/create_model.sh"]
     restart: "no"
+
   mysql:
     image: mysql:8.0
-    container_name: nurse-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: password
@@ -40,7 +34,7 @@ services:
       MYSQL_USER: nurse
       MYSQL_PASSWORD: password
     volumes:
-      - mysql-data:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
@@ -52,13 +46,13 @@ services:
   backend:
     build:
       context: .
-      dockerfile: backend.Dockerfile
-    container_name: nurse-backend
+      dockerfile: Dockerfile.backend
     restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
       - ./privnurse_gemma3n/backend:/backend
+    gpus: all
     depends_on:
       mysql:
         condition: service_healthy
@@ -66,40 +60,16 @@ services:
         condition: service_healthy
       ollama-init:
         condition: service_completed_successfully
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
 
   frontend:
-    build:
-      context: .
-      dockerfile: frontend.Dockerfile
-    container_name: nurse-frontend
+    image: node:20-bookworm-slim
     restart: unless-stopped
     ports:
       - "3000:3000"
+    working_dir: /frontend
     volumes:
       - ./privnurse_gemma3n/frontend:/frontend
-      - frontend-node-modules:/frontend/node_modules
-      - frontend-build:/frontend/.next
-    # command: npm run dev
+    command: sh -lc "npm ci && npm run build && npm run start"
+    # command: sh -lc "npm ci && npm run dev"
     depends_on:
       - backend
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: cftunnel
-    command: tunnel run
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-    restart: unless-stopped
-
-volumes:
-  ollama:
-  mysql-data:
-  frontend-node-modules:
-  frontend-build:

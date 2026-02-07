@@ -45,15 +45,14 @@ create_if_missing() {
 
 log "OLLAMA_HOST=$OLLAMA_HOST"
 if ! wait_ollama; then
-  # ollama 起不來就直接結束（這種情況繼續也沒用）
   exit 1
 fi
 
-# 1) 出院 summary（檔名照你現在的：Modelfile_TCVGH_Summary_V1.3）
-create_if_missing "gemma-3n-privnurse-note-summary-v1" "/models/Modelfile_TCVGH_Summary_v1.3"
+# 1) 出院 summary
+create_if_missing "gemma-3n-privnurse-note-summary:v1.3" "/models/Modelfile_TCVGH_Summary_v1.3"
 
-# 2) 出院 validation（檔名照你現在的：Modelfile_TCVGH_Validation_v1）
-create_if_missing "gemma-3n-privnurse-note-validation-v1" "/models/Modelfile_TCVGH_Validation_v1"
+# 2) 出院 validation
+create_if_missing "gemma-3n-privnurse-note-validation:v1" "/models/Modelfile_TCVGH_Validation_v1"
 
 log "all done"
 exit 0

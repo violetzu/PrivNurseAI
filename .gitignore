@@ -5,3 +5,5 @@
 *.csv
 *.log
 */logs/
+data/mysql/*
+data/ollama/*
