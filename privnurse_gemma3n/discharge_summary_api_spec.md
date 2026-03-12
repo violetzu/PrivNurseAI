@@ -3,7 +3,6 @@
 **版本**: 1.0
 **服務**: 出院摘要生成與驗證
 **Base URL**: `http://<host>:<port>`
-**認證**: Bearer Token（`Authorization: Bearer <token>`）
 
 ---
 
