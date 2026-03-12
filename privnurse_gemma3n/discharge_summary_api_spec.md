@@ -30,7 +30,8 @@
 ```json
 {
   "caseno": "string",
-  "med_number": "string",
+  "hhisnum": "string",
+  "deviceId": "string",
   "hnursta": "string",
   "hbed": "string",
   "summary": {
@@ -75,9 +76,10 @@
 | 欄位 | 類型 | 必填 | 說明 |
 |------|------|------|------|
 | `caseno` | string | **是** | 就診號（8 碼），如 `00000003` |
-| `med_number` | string | **是** | 病歷號 / 醫院識別碼，如 `A12345678` |
+| `hhisnum` | string | **是** | HIS 系統內部病歷識別碼，如 `000000000A` |
+| `deviceId` | string | **是** | 裝置代碼（HIS 傳入或固定設定），如 `ER-1` |
 | `hnursta` | string | 否 | 護理站代碼（HIS 站點代號），如 `ER` |
-| `hbed` | string | 否 | 床位號碼，如 `123` |
+| `hbed` | string | 否 | 床位號碼 ( HIS )，如 `123` |
 | `summary.primary_diagnosis` | string | 否 | 主要診斷，含 ICD 碼（如：`高血壓 (I10)`） |
 | `summary.secondary_diagnosis` | string | 否 | 次要診斷，多項以 `;` 分隔 |
 | `summary.past_medical_history` | string | 否 | 過去病史，多項以 `;` 分隔 |
@@ -94,7 +96,7 @@
 | `lab_reports[].items[].name` | string | 是 | 檢驗項目名稱（如 `WBC`、`Hemoglobin`） |
 | `lab_reports[].items[].value` | string | 是 | 檢驗結果數值 |
 | `lab_reports[].items[].unit` | string | 否 | 單位（如 `K/uL`、`g/dL`） |
-| `lab_reports[].items[].flag` | string | 否 | 異常旗標：`NORMAL`（預設）、`HIGH`、`LOW`、`CRITICAL` |
+| `lab_reports[].items[].flag` | string | 否 | HIS 傳入的異常旗標（`NORMAL`、`HIGH`、`LOW`、`CRITICAL`），若無則 `NULL` |
 | `consultations` | array | 否 | 會診記錄列表（建議提供最近 10 筆） |
 | `consultations[].timestamp` | string | 是 | 會診時間，格式 `YYYY-MM-DD HH:MM:SS` |
 | `consultations[].nurse_confirmation` | string | 是 | 護理師確認後的會診內容（空字串則略過此筆） |
@@ -120,7 +122,7 @@
 <PatientEncounter summary_length_style="short|medium|long">
     <Summary>
         <CaseNo>00000003</CaseNo>
-        <MedNumber>A12345678</MedNumber>
+        <HhisNum>000000000A</HhisNum>
         <NursingStation>ER</NursingStation>
         <Bed>123</Bed>
         <PrimaryDiagnosis>高血壓 (I10)</PrimaryDiagnosis>
@@ -174,31 +176,64 @@
 ### 1.3 Response（串流）
 
 - **Content-Type**: `application/x-ndjson`
-- **格式**: 每行一個 JSON 物件（NDJSON）
+- **格式**: 每行一個 JSON 物件（NDJSON），`predictDatas` 陣列包裝
 
 **串流進行中（每行）**：
 ```json
-{"caseno": "00000003", "med_number": "A12345678", "hnursta": "ER", "hbed": "123", "created_at": "2024-01-01T08:00:00Z", "response": "病人因高血壓急性惡化", "done": false}
+{
+  "key": "f64a26ca79c24f6bb76e3379c30d682a",
+  "predictDatas": [
+    {
+      "deviceId": "ER-1",
+      "hnursta": "ER",
+      "hbed": "123",
+      "caseno": "00000003",
+      "hhisnum": "000000000A",
+      "response": "病人因高血壓急性惡化",
+      "done": false
+    }
+  ]
+}
 ```
 
 **串流結束（最後一行）**：
 ```json
-{"caseno": "00000003", "med_number": "A12345678", "hnursta": "ER", "hbed": "123", "created_at": "2024-01-01T08:00:00Z", "response": "", "done": true}
+{
+  "key": "f64a26ca79c24f6bb76e3379c30d682a",
+  "predictDatas": [
+    {
+      "deviceId": "ER-1",
+      "hnursta": "ER",
+      "hbed": "123",
+      "caseno": "00000003",
+      "hhisnum": "000000000A",
+      "predict_local": "2024-01-01 08:00:00",
+      "result": "病人因高血壓急性惡化，入院後給予 Amlodipine 5mg...",
+      "done": true,
+      "type": "NULL"
+    }
+  ]
+}
 ```
 
 #### Response 欄位說明
 
 | 欄位 | 類型 | 說明 |
 |------|------|------|
-| `caseno` | string | 就診號（原樣回傳，供前端對應來源） |
-| `med_number` | string | 病歷號（原樣回傳） |
-| `hnursta` | string | 護理站代碼（原樣回傳） |
-| `hbed` | string | 床位號碼（原樣回傳） |
-| `created_at` | string | 時間戳（ISO 8601） |
-| `response` | string | 本次 chunk 的生成文字片段，累加即為完整摘要 |
-| `done` | boolean | `false` = 串流進行中；`true` = 串流結束 |
+| `key` | string | HIS 提供的授權金鑰，如 `f64a26ca79c24f6bb76e3379c30d682a` |
+| `predictDatas` | array | 結果陣列（固定 1 筆） |
+| `predictDatas[].deviceId` | string | 裝置代碼（原樣回傳） |
+| `predictDatas[].hnursta` | string | 護理站代碼（原樣回傳） |
+| `predictDatas[].hbed` | string | 床位號碼（原樣回傳） |
+| `predictDatas[].caseno` | string | 就診號（原樣回傳） |
+| `predictDatas[].hhisnum` | string | HIS 病歷識別碼（原樣回傳） |
+| `predictDatas[].response` | string | 串流片段文字（僅 `done: false` 時） |
+| `predictDatas[].result` | string | 完整生成摘要（僅 `done: true` 時） |
+| `predictDatas[].predict_local` | string | 生成完成時間，格式 `YYYY-MM-DD HH:MM:SS`（僅 `done: true` 時） |
+| `predictDatas[].done` | boolean | `false` = 串流進行中；`true` = 串流結束 |
+| `predictDatas[].type` | string | AI 模組名稱（固定值），目前為 `"NULL"`（尚未確定）（僅 `done: true` 時） |
 
-**完整摘要** = 所有 `done: false` 的 `response` 欄位串接。
+**完整摘要** = 所有 `done: false` 的 `response` 欄位串接，或直接取 `done: true` 的 `result`。
 
 ---
 
@@ -212,33 +247,18 @@
 
 ### 2.1 Request Body
 
+欄位結構與 [1.1 Request Body](#11-request-body) 相同，額外新增以下欄位：
+
 ```json
 {
-  "caseno": "string",
-  "med_number": "string",
-  "hnursta": "string",
-  "hbed": "string",
-  "summary": {
-    "primary_diagnosis": "string",
-    "secondary_diagnosis": "string",
-    "past_medical_history": "string",
-    "chief_complaint": "string",
-    "present_illness": "string"
-  },
-  "nursing_events": [ ... ],
-  "lab_reports": [ ... ],
-  "consultations": [ ... ],
+  "...": "（同 1.1）",
   "treatment_course": "string"
 }
 ```
 
 | 欄位 | 類型 | 必填 | 說明 |
 |------|------|------|------|
-| `caseno` | string | **是** | 就診號（8 碼） |
-| `med_number` | string | **是** | 病歷號 / 醫院識別碼 |
-| `hnursta` | string | 否 | 護理站代碼 |
-| `hbed` | string | 否 | 床位號碼 |
-| `summary` / `nursing_events` / `lab_reports` / `consultations` | — | 否 | 同生成 API，作為驗證的參照原始資料 |
+| `caseno` / `hhisnum` / `deviceId` / `hnursta` / `hbed` / `summary` / `nursing_events` / `lab_reports` / `consultations` | — | 同 1.1 | 詳見 [1.1 欄位說明](#11-request-body) |
 | `treatment_course` | string | **是** | 護理師撰寫或由生成 API 產出的出院治療摘要全文 |
 
 ---
@@ -257,7 +277,7 @@
 
 模型根據兩段內容對照，輸出有資料支撐的關鍵詞，期望回傳格式：
 ```json
-{"relevant_text": ["高血壓", "Amlodipine 5mg", "血壓監控", "心臟科會診"]}
+{"result": ["高血壓", "Amlodipine 5mg", "血壓監控", "心臟科會診"]}
 ```
 
 ---
@@ -268,16 +288,18 @@
 
 ```json
 {
-  "caseno": "00000003",
-  "med_number": "A12345678",
-  "hnursta": "ER",
-  "hbed": "123",
-  "relevant_text": [
-    "高血壓急性惡化",
-    "Amlodipine 5mg",
-    "心臟科會診",
-    "血壓監控",
-    "WBC 偏高"
+  "key": "f64a26ca79c24f6bb76e3379c30d682a",
+  "predictDatas": [
+    {
+      "deviceId": "ER-1",
+      "hnursta": "ER",
+      "hbed": "123",
+      "caseno": "00000003",
+      "hhisnum": "000000000A",
+      "predict_local": "2024-01-01 14:20:32",
+      "result": ["高血壓急性惡化", "Amlodipine 5mg", "心臟科會診", "血壓監控", "WBC 偏高"],
+      "type": "NULL"
+    }
   ]
 }
 ```
@@ -286,11 +308,16 @@
 
 | 欄位 | 類型 | 說明 |
 |------|------|------|
-| `caseno` | string | 就診號（原樣回傳） |
-| `med_number` | string | 病歷號（原樣回傳） |
-| `hnursta` | string | 護理站代碼（原樣回傳） |
-| `hbed` | string | 床位號碼（原樣回傳） |
-| `relevant_text` | string[] | 出院摘要中有原始病歷資料支撐的詞彙/短句列表，供前端高亮標記 |
+| `key` | string | HIS 提供的授權金鑰，如 `f64a26ca79c24f6bb76e3379c30d682a` |
+| `predictDatas` | array | 結果陣列（固定 1 筆） |
+| `predictDatas[].deviceId` | string | 裝置代碼（原樣回傳） |
+| `predictDatas[].hnursta` | string | 護理站代碼（原樣回傳） |
+| `predictDatas[].hbed` | string | 床位號碼（原樣回傳） |
+| `predictDatas[].caseno` | string | 就診號（原樣回傳） |
+| `predictDatas[].hhisnum` | string | HIS 病歷識別碼（原樣回傳） |
+| `predictDatas[].predict_local` | string | 驗證完成時間，格式 `YYYY-MM-DD HH:MM:SS` |
+| `predictDatas[].result` | string[] | 出院摘要中有原始病歷資料支撐的詞彙/短句列表，供前端高亮標記 |
+| `predictDatas[].type` | string | AI 模組名稱（固定值），目前為 `"NULL"`（尚未確定） |
 
 ---
 
@@ -301,6 +328,8 @@
 ```xml
 <PatientEncounter summary_length_style="long">
     <Summary>
+        <CaseNo>00000003</CaseNo>
+        <HhisNum>000000000A</HhisNum>
         <PrimaryDiagnosis>高血壓 (I10); 急性心衰竭 (I50.9)</PrimaryDiagnosis>
         <SecondaryDiagnosis>第二型糖尿病 (E11); 慢性腎病 Stage 3 (N18.3)</SecondaryDiagnosis>
         <PastMedicalHistory>冠狀動脈疾病; 心房顫動</PastMedicalHistory>
@@ -377,8 +406,11 @@
 
 ### LabReport flag 定義
 
+由 HIS 傳入，若無則帶 `NULL`。
+
 | 值 | 說明 | XML 呈現方式 |
 |----|------|------------|
+| `NULL` | 未提供 | 不附加旗標 |
 | `NORMAL` | 正常範圍 | 不附加旗標 |
 | `HIGH` | 高於正常值 | 數值後加 `(HIGH)` |
 | `LOW` | 低於正常值 | 數值後加 `(LOW)` |
@@ -406,6 +438,11 @@ curl -X POST "http://localhost:8000/gen-discharge-summary" \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
+    "caseno": "00000003",
+    "hhisnum": "000000000A",
+    "deviceId": "ER-1",
+    "hnursta": "ER",
+    "hbed": "123",
     "summary": {
       "primary_diagnosis": "高血壓 (I10)",
       "secondary_diagnosis": "第二型糖尿病 (E11)",
@@ -451,6 +488,11 @@ curl -X POST "http://localhost:8000/gen-discharge-validation" \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
+    "caseno": "00000003",
+    "hhisnum": "000000000A",
+    "deviceId": "ER-1",
+    "hnursta": "ER",
+    "hbed": "123",
     "summary": { ... },
     "nursing_events": [ ... ],
     "lab_reports": [ ... ],
